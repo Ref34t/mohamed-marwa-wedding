@@ -139,7 +139,7 @@
           <div class="thumbs" id="thumbs"></div>
         </div>
 
-        <button class="btn btn-primary" id="submit" type="submit">أرسلوا إلى العروسين</button>
+        <button class="btn btn-primary" id="sendBtn" type="submit">أرسلوا إلى العروسين</button>
         <p class="error" id="error" role="alert" hidden></p>
 
         <input type="hidden" name="token" id="token">
@@ -189,7 +189,7 @@
       photos: document.getElementById('photos'),
       thumbs: document.getElementById('thumbs'),
       dropHint: document.getElementById('dropHint'),
-      submit: document.getElementById('submit'),
+      sendBtn: document.getElementById('sendBtn'),
       error: document.getElementById('error'),
       again: document.getElementById('again'),
       token: document.getElementById('token'),
@@ -409,7 +409,8 @@
         showError('تأخّر ردّ الخادم. إن لم تظهر كلمتكم في الدفتر بعد قليل، أرسلوها مرة أخرى.');
       }, REPLY_TIMEOUT);
 
-      el.form.submit();
+      // submit() may be shadowed by a form control named "submit"
+      HTMLFormElement.prototype.submit.call(el.form);
     }
 
     window.addEventListener('message', function (event) {
@@ -458,8 +459,8 @@
     });
 
     function setBusy(busy, label) {
-      el.submit.disabled = !!busy;
-      el.submit.textContent = busy ? (label || 'لحظة…') : 'أرسلوا إلى العروسين';
+      el.sendBtn.disabled = !!busy;
+      el.sendBtn.textContent = busy ? (label || 'لحظة…') : 'أرسلوا إلى العروسين';
       el.photos.disabled = !!busy;
     }
 
