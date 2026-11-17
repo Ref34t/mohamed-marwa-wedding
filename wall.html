@@ -237,34 +237,46 @@
       lbClose: document.getElementById('lbClose')
     };
 
-    /**
-     * نقرأ البيانات عبر JSONP لأن خادم Apps Script لا يسمح بالقراءة عبر النطاقات:
-     * <script src="…?api=wall&cb=اسم"> ثم يُنادى الاسم بالبيانات.
-     */
+    /** نقرأ الدفتر من الخادم عبر fetch (الخادم يسمح بالقراءة عبر النطاقات). */
     function loadWall() {
       if (loading) return;
       loading = true;
 
-      var name = 'wallCb' + Date.now().toString(36);
-      var script = document.createElement('script');
-      var timer = setTimeout(fail, 25000);
+      fetchJson(API + '?api=wall')
+        .then(function (data) {
+          loading = false;
+          render(data);
+        })
+        .catch(function () {
+          loading = false;
+          fail();
+        });
+    }
 
-      window[name] = function (data) {
-        clearTimeout(timer);
-        loading = false;
-        try { delete window[name]; } catch (err) { window[name] = null; }
-        if (script.parentNode) script.parentNode.removeChild(script);
-        render(data);
-      };
+    function fetchJson(url) {
+      var full = url + (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now();
+      var timer = null;
+      var ctrl = window.AbortController ? new AbortController() : null;
+      var options = { cache: 'no-store', credentials: 'omit' };
 
-      script.src = API + '?api=wall&cb=' + name + '&t=' + Date.now();
-      script.onerror = function () {
-        clearTimeout(timer);
-        loading = false;
-        fail();
-      };
+      if (ctrl) options.signal = ctrl.signal;
 
-      document.body.appendChild(script);
+      var timeout = new Promise(function (resolve, reject) {
+        timer = setTimeout(function () {
+          if (ctrl) ctrl.abort();
+          reject(new Error('timeout'));
+        }, 20000);
+      });
+
+      var request = fetch(full, options).then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      });
+
+      return Promise.race([request, timeout]).then(
+        function (data) { clearTimeout(timer); return data; },
+        function (err) { clearTimeout(timer); throw err; }
+      );
     }
 
     function fail() {

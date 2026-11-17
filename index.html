@@ -389,9 +389,8 @@
     });
 
     /**
-     * لا نستخدم fetch: خادم Apps Script لا يسمح بالقراءة عبر النطاقات.
-     * النموذج يُرسل داخل إطار مخفي، ثم نسأل الخادم عن نتيجة الرمز (token)
-     * عبر JSONP كل ثانيتين حتى تصل.
+     * النموذج يُرسل داخل إطار مخفي (لا نستطيع قراءة ردّ الإرسال)، ثم نسأل
+     * الخادم عن نتيجة الرمز (token) عبر fetch كل ثانية ونصف حتى تصل.
      */
     function send() {
       sending = true;
@@ -420,50 +419,45 @@
         return;
       }
 
-      jsonp(API + '?api=result&token=' + encodeURIComponent(token), function (data) {
-        if (!sending) return;
-        if (data && data.found) {
-          sending = false;
-          onSent(data);
-          return;
-        }
-        setTimeout(watchResult, 1500);
-      }, function () {
-        setTimeout(watchResult, 3000);
-      });
+      fetchJson(API + '?api=result&token=' + encodeURIComponent(token))
+        .then(function (data) {
+          if (!sending) return;
+          if (data && data.found) {
+            sending = false;
+            onSent(data);
+            return;
+          }
+          setTimeout(watchResult, 1500);
+        })
+        .catch(function () {
+          setTimeout(watchResult, 3000);
+        });
     }
 
-    /** قراءة عبر JSONP: خادم Apps Script لا يسمح بالقراءة عبر النطاقات. */
-    function jsonp(url, ok, fail) {
-      var name = 'cb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      var script = document.createElement('script');
-      var done = false;
+    function fetchJson(url) {
+      var full = url + (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now();
+      var timer = null;
+      var ctrl = window.AbortController ? new AbortController() : null;
+      var options = { cache: 'no-store', credentials: 'omit' };
 
-      var finish = function () {
-        if (done) return true;
-        done = true;
-        if (script.parentNode) script.parentNode.removeChild(script);
-        try { delete window[name]; } catch (err) { window[name] = null; }
-        return false;
-      };
+      if (ctrl) options.signal = ctrl.signal;
 
-      var timer = setTimeout(function () {
-        if (!finish()) fail();
-      }, 20000);
+      var timeout = new Promise(function (resolve, reject) {
+        timer = setTimeout(function () {
+          if (ctrl) ctrl.abort();
+          reject(new Error('timeout'));
+        }, 20000);
+      });
 
-      window[name] = function (data) {
-        clearTimeout(timer);
-        if (finish()) return;
-        ok(data);
-      };
+      var request = fetch(full, options).then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      });
 
-      script.onerror = function () {
-        clearTimeout(timer);
-        if (!finish()) fail();
-      };
-
-      script.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'cb=' + name + '&t=' + Date.now();
-      document.body.appendChild(script);
+      return Promise.race([request, timeout]).then(
+        function (data) { clearTimeout(timer); return data; },
+        function (err) { clearTimeout(timer); throw err; }
+      );
     }
 
     function onSent(result) {
