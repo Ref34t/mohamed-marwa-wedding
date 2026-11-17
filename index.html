@@ -176,7 +176,7 @@
 
     var items = [];       // { id, dataUrl, type, name }
     var token = '';
-    var replyTimer = null;
+    var startedAt = 0;
     var sending = false;
 
     var el = {
@@ -390,7 +390,8 @@
 
     /**
      * لا نستخدم fetch: خادم Apps Script لا يسمح بالقراءة عبر النطاقات.
-     * النموذج يُرسل داخل إطار مخفي، فيردّ الخادم بصفحة صغيرة تنادي postMessage.
+     * النموذج يُرسل داخل إطار مخفي، ثم نسأل الخادم عن نتيجة الرمز (token)
+     * عبر JSONP كل ثانيتين حتى تصل.
      */
     function send() {
       sending = true;
@@ -402,27 +403,68 @@
         photos: items.map(function (item) { return { dataUrl: item.dataUrl }; })
       });
 
-      clearTimeout(replyTimer);
-      replyTimer = setTimeout(function () {
-        if (!sending) return;
+      // submit() may be shadowed by a form control named "submit"
+      HTMLFormElement.prototype.submit.call(el.form);
+
+      startedAt = Date.now();
+      setTimeout(watchResult, 1200);
+    }
+
+    function watchResult() {
+      if (!sending) return;
+
+      if (Date.now() - startedAt > REPLY_TIMEOUT) {
         sending = false;
         setBusy(false);
         showError('تأخّر ردّ الخادم. إن لم تظهر كلمتكم في الدفتر بعد قليل، أرسلوها مرة أخرى.');
-      }, REPLY_TIMEOUT);
+        return;
+      }
 
-      // submit() may be shadowed by a form control named "submit"
-      HTMLFormElement.prototype.submit.call(el.form);
+      jsonp(API + '?api=result&token=' + encodeURIComponent(token), function (data) {
+        if (!sending) return;
+        if (data && data.found) {
+          sending = false;
+          onSent(data);
+          return;
+        }
+        setTimeout(watchResult, 1500);
+      }, function () {
+        setTimeout(watchResult, 3000);
+      });
     }
 
-    window.addEventListener('message', function (event) {
-      var data = event.data;
-      if (!data || data.wall !== 'reply' || data.token !== token) return;
-      if (!sending) return;
+    /** قراءة عبر JSONP: خادم Apps Script لا يسمح بالقراءة عبر النطاقات. */
+    function jsonp(url, ok, fail) {
+      var name = 'cb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      var script = document.createElement('script');
+      var done = false;
 
-      clearTimeout(replyTimer);
-      sending = false;
-      onSent(data);
-    });
+      var finish = function () {
+        if (done) return true;
+        done = true;
+        if (script.parentNode) script.parentNode.removeChild(script);
+        try { delete window[name]; } catch (err) { window[name] = null; }
+        return false;
+      };
+
+      var timer = setTimeout(function () {
+        if (!finish()) fail();
+      }, 20000);
+
+      window[name] = function (data) {
+        clearTimeout(timer);
+        if (finish()) return;
+        ok(data);
+      };
+
+      script.onerror = function () {
+        clearTimeout(timer);
+        if (!finish()) fail();
+      };
+
+      script.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'cb=' + name + '&t=' + Date.now();
+      document.body.appendChild(script);
+    }
 
     function onSent(result) {
       setBusy(false);
