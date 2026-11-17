@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دفتر التهاني — محمد ومروة</title>
+  <meta name="description" content="تهاني وأمنيات وصور من ليلة زفاف محمد ومروة">
+  <meta name="theme-color" content="#faf7f3">
+  <meta property="og:title" content="دفتر التهاني — محمد ومروة">
+  <meta property="og:description" content="تهاني وأمنيات وصور من ليلة زفاف محمد ومروة">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .shell { max-width: 1080px; }
+
+    .wall-head { text-align: center; margin-bottom: 34px; }
+    .wall-head .btn { margin-top: 20px; width: auto; padding: 12px 24px; }
+    .wall-head .lede { max-width: 44ch; }
+
+    .wall {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .post {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px 20px 18px;
+      animation: rise .35s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .post-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .post-name {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.5;
+    }
+
+    .post-time {
+      font-size: 12px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .post-text {
+      margin: 0 0 14px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 15.5px;
+      line-height: 1.85;
+    }
+
+    .post-text:last-child { margin-bottom: 0; }
+
+    .post-photos {
+      display: grid;
+      gap: 6px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .post-photos.n-1 { grid-template-columns: 1fr; }
+    .post-photos.n-3 > .shot:first-child,
+    .post-photos.n-5 > .shot:first-child { grid-column: span 2; }
+
+    .shot {
+      padding: 0;
+      border: 0;
+      background: #f1eae1;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: zoom-in;
+      display: block;
+      aspect-ratio: 4 / 3;
+      line-height: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .post-photos.n-1 .shot { aspect-ratio: auto; }
+
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .25s ease;
+    }
+
+    .post-photos.n-1 .shot img { height: auto; max-height: 520px; }
+
+    .shot:hover img { transform: scale(1.02); }
+
+    .empty {
+      text-align: center;
+      color: var(--ink-soft);
+      padding: 56px 20px;
+      font-size: 15px;
+      line-height: 1.9;
+      border: 1.5px dashed var(--line);
+      border-radius: var(--radius);
+    }
+
+    .skeleton {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      height: 180px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: .55; }
+      50% { opacity: .95; }
+    }
+
+    /* عارض الصور ------------------------------------------------ */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 13, 9, .94);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      z-index: 50;
+      padding: 16px;
+    }
+
+    .lightbox[hidden] { display: none; }
+
+    .lightbox img {
+      grid-column: 2;
+      max-width: 100%;
+      max-height: calc(100vh - 32px);
+      margin: 0 auto;
+      border-radius: 6px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .lb-close, .lb-nav {
+      background: rgba(255, 255, 255, .1);
+      border: 0;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .lb-close {
+      position: absolute;
+      top: 14px;
+      inset-inline-end: 14px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .lb-nav { width: 42px; height: 42px; }
+    .lb-nav[hidden] { display: none; }
+    .lb-nav[data-dir="prev"] { grid-column: 1; }
+    .lb-nav[data-dir="next"] { grid-column: 3; }
+    .lb-nav:disabled { opacity: .25; cursor: default; }
+    .lb-nav:hover, .lb-close:hover { background: rgba(255, 255, 255, .2); }
+
+    @media (max-width: 480px) {
+      .shell { padding: 34px 16px 52px; }
+      .post { padding: 17px 16px 15px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="wall-head">
+      <p class="eyebrow">الدفتر</p>
+      <h1>دفتر التهاني</h1>
+      <p class="lede">بمناسبة زفاف محمد ومروة</p>
+      <a class="btn btn-primary" href="index.html">أضيفوا كلمتكم وصوركم</a>
+    </header>
+
+    <p class="empty" id="empty" hidden>لا توجد كلمات بعد. تظهر التهاني والصور هنا بعد أن يوافق عليها العروسان.</p>
+
+    <div class="wall" id="wall">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+
+    <p class="foot" id="count"></p>
+  </main>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lb-close" id="lbClose" aria-label="إغلاق">×</button>
+    <button class="lb-nav" data-dir="prev" id="lbPrev" aria-label="الصورة السابقة">›</button>
+    <img id="lbImage" alt="">
+    <button class="lb-nav" data-dir="next" id="lbNext" aria-label="الصورة التالية">‹</button>
+  </div>
+
+  <script>
+    var API = 'https://script.google.com/macros/s/AKfycbyKiuafAizFRBGuKW9nlbeWq9HZPZh_e6N1fXPAFZw2vz648ZhGXpsjmBBFfaq1fosm/exec';
+
+    var entries = [];
+    var lightbox = { photos: [], index: 0 };
+    var loading = false;
+
+    var el = {
+      wall: document.getElementById('wall'),
+      empty: document.getElementById('empty'),
+      count: document.getElementById('count'),
+      lightbox: document.getElementById('lightbox'),
+      lbImage: document.getElementById('lbImage'),
+      lbPrev: document.getElementById('lbPrev'),
+      lbNext: document.getElementById('lbNext'),
+      lbClose: document.getElementById('lbClose')
+    };
+
+    /**
+     * نقرأ البيانات عبر JSONP لأن خادم Apps Script لا يسمح بالقراءة عبر النطاقات:
+     * <script src="…?api=wall&cb=اسم"> ثم يُنادى الاسم بالبيانات.
+     */
+    function loadWall() {
+      if (loading) return;
+      loading = true;
+
+      var name = 'wallCb' + Date.now().toString(36);
+      var script = document.createElement('script');
+      var timer = setTimeout(fail, 25000);
+
+      window[name] = function (data) {
+        clearTimeout(timer);
+        loading = false;
+        try { delete window[name]; } catch (err) { window[name] = null; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+        render(data);
+      };
+
+      script.src = API + '?api=wall&cb=' + name + '&t=' + Date.now();
+      script.onerror = function () {
+        clearTimeout(timer);
+        loading = false;
+        fail();
+      };
+
+      document.body.appendChild(script);
+    }
+
+    function fail() {
+      loading = false;
+      el.wall.innerHTML = '';
+      el.empty.hidden = false;
+      el.empty.innerHTML = 'تعذّر تحميل الدفتر الآن.<br><a href="">أعيدوا المحاولة</a>';
+      el.count.textContent = '';
+    }
+
+    loadWall();
+
+    function render(data) {
+      entries = (data && data.entries) || [];
+      el.wall.innerHTML = '';
+
+      if (!entries.length) {
+        el.empty.hidden = false;
+        el.count.textContent = '';
+        return;
+      }
+
+      el.empty.hidden = true;
+      var frag = document.createDocumentFragment();
+
+      entries.forEach(function (entry, i) {
+        var post = document.createElement('article');
+        post.className = 'post';
+        post.style.animationDelay = Math.min(i, 8) * 40 + 'ms';
+
+        var head = document.createElement('header');
+        head.className = 'post-head';
+
+        var name = document.createElement('span');
+        name.className = 'post-name';
+        name.textContent = entry.name || 'ضيف';
+
+        head.appendChild(name);
+
+        if (entry.time) {
+          var time = document.createElement('time');
+          time.className = 'post-time';
+          time.dateTime = entry.time;
+          time.textContent = formatDate(entry.time);
+          head.appendChild(time);
+        }
+
+        post.appendChild(head);
+
+        if (entry.message) {
+          var text = document.createElement('p');
+          text.className = 'post-text';
+          text.textContent = entry.message;
+          post.appendChild(text);
+        }
+
+        if (entry.photos && entry.photos.length) {
+          var grid = document.createElement('div');
+          grid.className = 'post-photos n-' + Math.min(entry.photos.length, 6);
+
+          entry.photos.forEach(function (photo, index) {
+            var button = document.createElement('button');
+            button.className = 'shot';
+            button.type = 'button';
+            button.setAttribute('aria-label', 'افتح الصورة ' + (index + 1));
+
+            var img = document.createElement('img');
+            img.src = photo.url;
+            img.alt = 'صورة من ' + (entry.name || 'أحد الضيوف');
+            img.loading = 'lazy';
+            img.decoding = 'async';
+
+            var retried = false;
+            img.addEventListener('error', function () {
+              if (!retried) {
+                retried = true;
+                img.src = 'https://lh3.googleusercontent.com/d/' + photo.id + '=w1600';
+                return;
+              }
+              button.style.display = 'none';
+            });
+
+            button.appendChild(img);
+            button.addEventListener('click', function () {
+              openLightbox(entry.photos, index);
+            });
+
+            grid.appendChild(button);
+          });
+
+          post.appendChild(grid);
+        }
+
+        frag.appendChild(post);
+      });
+
+      el.wall.appendChild(frag);
+      el.count.textContent = countText(entries.length);
+    }
+
+    /** صيغة العدد العربية: تهنية واحدة، تهنيتان، ٥ تهانٍ، ١١ تهنية. */
+    function countText(n) {
+      if (n === 1) return 'تهنية واحدة على الدفتر';
+      if (n === 2) return 'تهنيتان على الدفتر';
+      if (n >= 3 && n <= 10) return n + ' تهانٍ على الدفتر';
+      return n + ' تهنية على الدفتر';
+    }
+
+    function formatDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('ar', { day: 'numeric', month: 'long' });
+      } catch (err) {
+        return '';
+      }
+    }
+
+    /* عارض الصور ------------------------------------------------ */
+
+    function openLightbox(photos, index) {
+      lightbox.photos = photos;
+      lightbox.index = index;
+      updateLightbox();
+      el.lightbox.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+
+    function updateLightbox() {
+      var photo = lightbox.photos[lightbox.index];
+      if (!photo) return;
+      el.lbImage.src = photo.url;
+      var many = lightbox.photos.length > 1;
+      el.lbPrev.hidden = !many;
+      el.lbNext.hidden = !many;
+      el.lbPrev.disabled = lightbox.index === 0;
+      el.lbNext.disabled = lightbox.index === lightbox.photos.length - 1;
+    }
+
+    function closeLightbox() {
+      el.lightbox.hidden = true;
+      el.lbImage.removeAttribute('src');
+      document.body.style.overflow = '';
+    }
+
+    function step(delta) {
+      var next = lightbox.index + delta;
+      if (next < 0 || next >= lightbox.photos.length) return;
+      lightbox.index = next;
+      updateLightbox();
+    }
+
+    el.lbClose.addEventListener('click', closeLightbox);
+    el.lbPrev.addEventListener('click', function () { step(-1); });
+    el.lbNext.addEventListener('click', function () { step(1); });
+    el.lightbox.addEventListener('click', function (event) {
+      if (event.target === el.lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (el.lightbox.hidden) return;
+      if (event.key === 'Escape') closeLightbox();
+      if (event.key === 'ArrowLeft') step(1);   // في الاتجاه العربي التالي إلى اليسار
+      if (event.key === 'ArrowRight') step(-1);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+  /* مظهر مشترك للصفحتين: ورق دافئ، حبر غامق، ولمسة واحدة من الطين. */
+  :root {
+    --paper: #faf7f3;
+    --card: #fffdfa;
+    --ink: #211c17;
+    --ink-soft: #6d645a;
+    --line: #e6ddd2;
+    --clay: #9c4f2b;
+    --clay-dark: #7f3f22;
+    --good: #4b6b4f;
+    --radius: 14px;
+    --serif: "Amiri", "Noto Naskh Arabic", "Times New Roman", serif;
+    --sans: "Cairo", "Noto Naskh Arabic", system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+    --shadow: 0 1px 2px rgba(40, 25, 10, 0.05), 0 14px 30px -22px rgba(40, 25, 10, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    text-align: start;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 48px 20px 64px;
+  }
+
+  /* العنوان ------------------------------------------------------ */
+
+  .masthead { text-align: center; margin-bottom: 28px; }
+
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0;
+    color: var(--clay);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(30px, 7vw, 44px);
+    line-height: 1.4;
+    letter-spacing: 0;
+    margin: 0 0 6px;
+  }
+
+  .lede {
+    color: var(--ink-soft);
+    font-size: 16px;
+    line-height: 1.8;
+    margin: 0 auto;
+    max-width: 36ch;
+  }
+
+  /* البطاقة ------------------------------------------------------ */
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px 22px;
+  }
+
+  /* النموذج ------------------------------------------------------ */
+
+  .field { margin-bottom: 22px; }
+
+  .field > label:not(.dropzone),
+  .field > .label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+
+  input[type="text"],
+  textarea {
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 13px 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  textarea { resize: vertical; min-height: 104px; line-height: 1.7; }
+
+  input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--clay);
+    box-shadow: 0 0 0 3px rgba(156, 79, 43, 0.12);
+  }
+
+  ::placeholder { color: #a89e93; }
+
+  .counter {
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: end;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .counter.over { color: var(--clay); }
+
+  /* الأزرار ------------------------------------------------------ */
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 13px 26px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.06s ease, color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--clay);
+    color: #fff;
+    border-color: var(--clay);
+  }
+
+  .btn-primary:hover { background: var(--clay-dark); border-color: var(--clay-dark); }
+
+  .btn-primary[disabled] {
+    opacity: 0.65;
+    cursor: progress;
+    transform: none;
+  }
+
+  .btn-quiet {
+    background: transparent;
+    color: var(--clay);
+    border-color: var(--line);
+  }
+
+  .btn-quiet:hover { border-color: var(--clay); }
+
+  .hint {
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: center;
+    margin: 14px 0 0;
+  }
+
+  .error {
+    margin: 16px 0 0;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: #fbf0ea;
+    border: 1px solid #eed3c5;
+    color: #8a3d1d;
+    font-size: 14px;
+  }
+
+  .muted { color: var(--ink-soft); }
+
+  .foot {
+    text-align: center;
+    font-size: 12px;
+    color: #9a9086;
+    margin-top: 32px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }

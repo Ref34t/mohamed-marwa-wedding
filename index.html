@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دفتر التهاني — محمد ومروة</title>
+  <meta name="description" content="اكتبوا لنا كلمة… وأضيفوا الصور التي التقطتموها">
+  <meta name="theme-color" content="#faf7f3">
+  <meta property="og:title" content="دفتر التهاني — محمد ومروة">
+  <meta property="og:description" content="اكتبوا لنا كلمة… وأضيفوا الصور التي التقطتموها">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .dropzone {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border: 1.5px dashed #d8cbbc;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #fff;
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: normal;
+      transition: border-color .15s ease, background-color .15s ease;
+    }
+    .dropzone:hover, .dropzone:focus-within { border-color: var(--clay); background: #fffaf6; }
+    .dropzone-icon {
+      flex: 0 0 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #f6efe6;
+      color: var(--clay);
+      font-size: 22px;
+      line-height: 1;
+    }
+    .dropzone-text { font-size: 14px; line-height: 1.6; }
+    .dropzone-text strong { font-weight: 600; }
+    .dropzone-text .muted { font-size: 12.5px; }
+
+    .thumbs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .thumb {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f1eae1;
+      border: 1px solid var(--line);
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb button {
+      position: absolute;
+      top: 3px;
+      inset-inline-end: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 0;
+      background: rgba(24, 18, 12, .62);
+      color: #fff;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+    }
+    .thumb button:hover { background: rgba(24, 18, 12, .85); }
+
+    .success { text-align: center; padding: 34px 24px; }
+    .success-mark {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #eef3ec;
+      color: var(--good);
+      font-size: 26px;
+    }
+    .success h2 {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1.5;
+      margin: 0 0 6px;
+    }
+    .success p { color: var(--ink-soft); margin: 0 0 22px; font-size: 15px; }
+    .success-actions { display: grid; gap: 10px; }
+    .success-actions .btn { width: 100%; }
+
+    .sink { display: none; }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <p class="eyebrow">بمناسبة زفاف محمد ومروة</p>
+      <h1>دفتر التهاني</h1>
+      <p class="lede">اكتبوا لنا كلمة… وأضيفوا الصور التي التقطتموها</p>
+    </header>
+
+    <section class="card" id="formCard">
+      <form id="form" novalidate method="post" enctype="multipart/form-data">
+        <div class="field">
+          <label for="name">اسمك</label>
+          <input id="name" type="text" name="name" autocomplete="name" maxlength="60" placeholder="مثال: خال رامي">
+        </div>
+
+        <div class="field">
+          <label for="message">كلمتك لنا</label>
+          <textarea id="message" name="message" rows="4" maxlength="1200"
+            placeholder="أمنية، ذكرى، أو تحذير لطيف عن الكلمات في الحفل…"></textarea>
+          <div class="counter"><span id="count">0</span>/1200</div>
+        </div>
+
+        <div class="field">
+          <span class="label">صور التقطتموها</span>
+          <label class="dropzone" for="photos">
+            <span class="dropzone-icon">+</span>
+            <span class="dropzone-text">
+              <strong>أضيفوا صورًا</strong><br>
+              <span class="muted" id="dropHint">حتى 10 صور · نضغطها لكم تلقائيًا</span>
+            </span>
+            <input id="photos" type="file" accept="image/*" multiple hidden>
+          </label>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+
+        <button class="btn btn-primary" id="submit" type="submit">أرسلوا إلى العروسين</button>
+        <p class="error" id="error" role="alert" hidden></p>
+
+        <input type="hidden" name="token" id="token">
+        <input type="text" name="website" id="website" class="sink" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <textarea name="payload" id="payload" class="sink" aria-hidden="true" tabindex="-1"></textarea>
+      </form>
+    </section>
+
+    <section class="card success" id="successCard" hidden>
+      <div class="success-mark">✓</div>
+      <h2>شكرًا لكم</h2>
+      <p id="successText">وصلت كلمتكم إلى العروسين.</p>
+      <div class="success-actions">
+        <a class="btn btn-primary" href="wall.html">شاهدوا الدفتر</a>
+        <button class="btn btn-quiet" id="again" type="button">اكتبوا كلمة أخرى</button>
+      </div>
+    </section>
+  </main>
+
+  <iframe name="sink" id="sink" class="sink" title="" aria-hidden="true" tabindex="-1"></iframe>
+
+  <script>
+    // الخادم: نفس تطبيق Google Apps Script، لكن الصفحة الآن على نطاق عادي.
+    var API = 'https://script.google.com/macros/s/AKfycbyKiuafAizFRBGuKW9nlbeWq9HZPZh_e6N1fXPAFZw2vz648ZhGXpsjmBBFfaq1fosm/exec';
+
+    var MAX_PHOTOS = 10;
+    var MAX_NAME = 60;
+    var MAX_MESSAGE = 1200;
+    var MAX_EDGE = 1800;
+    var QUALITY = 0.82;
+    var TOTAL_BUDGET = 14 * 1024 * 1024; // عدد أحرف base64، أي نحو 10 ميجابايت من الصور
+    var REPLY_TIMEOUT = 120000;
+
+    var items = [];       // { id, dataUrl, type, name }
+    var token = '';
+    var replyTimer = null;
+    var sending = false;
+
+    var el = {
+      form: document.getElementById('form'),
+      formCard: document.getElementById('formCard'),
+      successCard: document.getElementById('successCard'),
+      successText: document.getElementById('successText'),
+      name: document.getElementById('name'),
+      message: document.getElementById('message'),
+      count: document.getElementById('count'),
+      photos: document.getElementById('photos'),
+      thumbs: document.getElementById('thumbs'),
+      dropHint: document.getElementById('dropHint'),
+      submit: document.getElementById('submit'),
+      error: document.getElementById('error'),
+      again: document.getElementById('again'),
+      token: document.getElementById('token'),
+      website: document.getElementById('website'),
+      payload: document.getElementById('payload'),
+      sink: document.getElementById('sink')
+    };
+
+    el.form.action = API;
+    el.name.maxLength = MAX_NAME;
+    el.message.maxLength = MAX_MESSAGE;
+    el.dropHint.textContent = 'حتى ' + MAX_PHOTOS + ' صور · نضغطها لكم تلقائيًا';
+
+    el.message.addEventListener('input', function () {
+      el.count.textContent = String(el.message.value.length);
+    });
+
+    el.photos.addEventListener('change', function (event) {
+      var files = Array.prototype.slice.call(event.target.files || []);
+      event.target.value = '';
+      if (!files.length) return;
+
+      var room = MAX_PHOTOS - items.length;
+      if (room <= 0) {
+        showError('الحد الأقصى ' + MAX_PHOTOS + ' صور. احذفوا صورة أولًا.');
+        return;
+      }
+      if (files.length > room) {
+        showError('يمكن إضافة ' + room + ' صور فقط. اخترنا أول ' + room + ' منها.');
+        files = files.slice(0, room);
+      } else {
+        clearError();
+      }
+
+      addFiles(files);
+    });
+
+    async function addFiles(files) {
+      setBusy(true, 'نجهّز الصور…');
+      for (var i = 0; i < files.length; i++) {
+        try {
+          var prepared = await prepare(files[i]);
+          if (!prepared) continue;
+          items.push({
+            id: 'p' + Date.now() + '-' + i,
+            dataUrl: prepared.dataUrl,
+            type: prepared.type,
+            name: prepared.name
+          });
+          renderThumbs();
+        } catch (err) {
+          showError(err.message || 'تعذّرت إضافة هذه الصورة.');
+        }
+      }
+      setBusy(false);
+    }
+
+    function renderThumbs() {
+      el.thumbs.innerHTML = '';
+      items.forEach(function (item) {
+        var wrap = document.createElement('div');
+        wrap.className = 'thumb';
+
+        var img = document.createElement('img');
+        img.src = item.dataUrl;
+        img.alt = '';
+
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.setAttribute('aria-label', 'حذف الصورة');
+        remove.textContent = '×';
+        remove.addEventListener('click', function () {
+          items = items.filter(function (x) { return x.id !== item.id; });
+          renderThumbs();
+          clearError();
+        });
+
+        wrap.appendChild(img);
+        wrap.appendChild(remove);
+        el.thumbs.appendChild(wrap);
+      });
+    }
+
+    /** تصغير الصورة إلى حجم معقول وإعادة ترميزها بصيغة JPEG، مع الرجوع للملف الأصلي عند الحاجة. */
+    async function prepare(file) {
+      if (!/^image\//.test(file.type) && !/\.hei[cf]$/i.test(file.name)) {
+        throw new Error('«' + file.name + '» ليس ملف صورة.');
+      }
+
+      var source = null;
+      try {
+        source = await createBitmap(file);
+      } catch (err) {
+        source = null;
+      }
+
+      if (!source) {
+        // المتصفحات التي لا تستطيع قراءة الملف (غالبًا HEIC على أندرويد) نرسله كما هو.
+        if (file.size > 4 * 1024 * 1024) {
+          throw new Error('«' + file.name + '» أكبر من أن يُرسل من هذا المتصفح. جرّبوا صورة شاشة بدلًا منها.');
+        }
+        var raw = await readDataUrl(file);
+        return { dataUrl: raw, type: file.type || 'image/jpeg', name: file.name };
+      }
+
+      var width = source.width || source.naturalWidth;
+      var height = source.height || source.naturalHeight;
+      var scale = Math.min(1, MAX_EDGE / Math.max(width, height));
+
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
+
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+
+      if (source.close) source.close();
+
+      return {
+        dataUrl: canvas.toDataURL('image/jpeg', QUALITY),
+        type: 'image/jpeg',
+        name: file.name
+      };
+    }
+
+    async function createBitmap(file) {
+      if (window.createImageBitmap) {
+        try {
+          return await createImageBitmap(file, { imageOrientation: 'from-image' });
+        } catch (err) {
+          // متصفحات Safari الأقدم ترفض كائن الخيارات؛ نحاول بدونها.
+        }
+        try {
+          return await createImageBitmap(file);
+        } catch (err) {
+          // ملفات HEIC وما يشبهها: ننتقل إلى قراءتها عبر <img>.
+        }
+      }
+      return await loadImage(file);
+    }
+
+    function loadImage(file) {
+      return new Promise(function (resolve, reject) {
+        var url = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function () {
+          URL.revokeObjectURL(url);
+          resolve(img);
+        };
+        img.onerror = function () {
+          URL.revokeObjectURL(url);
+          reject(new Error('تعذّرت قراءة هذه الصورة.'));
+        };
+        img.src = url;
+      });
+    }
+
+    function readDataUrl(file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () { resolve(reader.result); };
+        reader.onerror = function () { reject(new Error('تعذّرت قراءة هذا الملف.')); };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    el.form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (sending) return;
+
+      var name = el.name.value.trim();
+      var message = el.message.value.trim();
+
+      if (!name) {
+        showError('من فضلكم اكتبوا اسمكم.');
+        el.name.focus();
+        return;
+      }
+      if (!message && !items.length) {
+        showError('اكتبوا كلمة، أو أضيفوا صورة، أو كليهما.');
+        el.message.focus();
+        return;
+      }
+
+      var total = items.reduce(function (sum, item) { return sum + item.dataUrl.length; }, 0);
+      if (total > TOTAL_BUDGET) {
+        showError('هذه صور كثيرة في مرة واحدة. احذفوا بعضها وأرسلوا، ثم أضيفوا الباقي في رسالة أخرى.');
+        return;
+      }
+
+      clearError();
+      setBusy(true, 'جارٍ الإرسال…');
+      send();
+    });
+
+    /**
+     * لا نستخدم fetch: خادم Apps Script لا يسمح بالقراءة عبر النطاقات.
+     * النموذج يُرسل داخل إطار مخفي، فيردّ الخادم بصفحة صغيرة تنادي postMessage.
+     */
+    function send() {
+      sending = true;
+      token = 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+      el.token.value = token;
+      el.website.value = '';
+      el.payload.value = JSON.stringify({
+        photos: items.map(function (item) { return { dataUrl: item.dataUrl }; })
+      });
+
+      clearTimeout(replyTimer);
+      replyTimer = setTimeout(function () {
+        if (!sending) return;
+        sending = false;
+        setBusy(false);
+        showError('تأخّر ردّ الخادم. إن لم تظهر كلمتكم في الدفتر بعد قليل، أرسلوها مرة أخرى.');
+      }, REPLY_TIMEOUT);
+
+      el.form.submit();
+    }
+
+    window.addEventListener('message', function (event) {
+      var data = event.data;
+      if (!data || data.wall !== 'reply' || data.token !== token) return;
+      if (!sending) return;
+
+      clearTimeout(replyTimer);
+      sending = false;
+      onSent(data);
+    });
+
+    function onSent(result) {
+      setBusy(false);
+      if (!result || !result.ok) {
+        showError((result && result.error) || 'حدث خطأ ما. حاولوا مرة أخرى.');
+        return;
+      }
+
+      el.formCard.hidden = true;
+      el.successCard.hidden = false;
+      el.successText.textContent = items.length
+        ? 'وصلت كلمتكم و' + photosWord(items.length) + ' إلى العروسين.'
+        : 'وصلت كلمتكم إلى العروسين.';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      items = [];
+      renderThumbs();
+      el.form.reset();
+      el.count.textContent = '0';
+      el.payload.value = '';
+    }
+
+    /** صيغة العدد العربية: صورة واحدة، صورتان، ٣ صور، ١١ صورة… */
+    function photosWord(n) {
+      if (n === 1) return 'صورة واحدة';
+      if (n === 2) return 'صورتان';
+      if (n >= 3 && n <= 10) return n + ' صور';
+      return n + ' صورة';
+    }
+
+    el.again.addEventListener('click', function () {
+      el.successCard.hidden = true;
+      el.formCard.hidden = false;
+      el.name.focus();
+    });
+
+    function setBusy(busy, label) {
+      el.submit.disabled = !!busy;
+      el.submit.textContent = busy ? (label || 'لحظة…') : 'أرسلوا إلى العروسين';
+      el.photos.disabled = !!busy;
+    }
+
+    function showError(message) {
+      el.error.textContent = message;
+      el.error.hidden = false;
+    }
+
+    function clearError() {
+      el.error.hidden = true;
+      el.error.textContent = '';
+    }
+  </script>
+</body>
+</html>
