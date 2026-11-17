@@ -172,11 +172,13 @@
     var MAX_EDGE = 1800;
     var QUALITY = 0.82;
     var TOTAL_BUDGET = 14 * 1024 * 1024; // عدد أحرف base64، أي نحو 10 ميجابايت من الصور
-    var REPLY_TIMEOUT = 120000;
+    var REPLY_TIMEOUT = 180000;
+    var SLOW_HINT = 9000;
 
     var items = [];       // { id, dataUrl, type, name }
     var token = '';
     var startedAt = 0;
+    var slowTimer = null;
     var sending = false;
 
     var el = {
@@ -407,6 +409,12 @@
 
       startedAt = Date.now();
       setTimeout(watchResult, 1200);
+
+      // أندرويد وبطء الشبكة: نطمئن الضيف أن الإرسال ما زال جاريًا.
+      clearTimeout(slowTimer);
+      slowTimer = setTimeout(function () {
+        if (sending) el.sendBtn.textContent = 'جارٍ الإرسال… قد يستغرق نصف دقيقة';
+      }, SLOW_HINT);
     }
 
     function watchResult() {
@@ -496,6 +504,7 @@
     });
 
     function setBusy(busy, label) {
+      if (!busy) clearTimeout(slowTimer);
       el.sendBtn.disabled = !!busy;
       el.sendBtn.textContent = busy ? (label || 'لحظة…') : 'أرسلوا إلى العروسين';
       el.photos.disabled = !!busy;
